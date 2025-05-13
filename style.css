@@ -9,7 +9,7 @@
     height: 80px;
     background-color: #eee;
     font-size: 2em;
-    display: flex;
+    display: flex; 
     align-items: center;
     justify-content: center;
     cursor: pointer;
