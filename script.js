@@ -1,80 +1,80 @@
+const cells = document.querySelectorAll('.cell');
+const restartBtn = document.getElementById('restartBtn');
+const playerXScore = document.getElementById('playerXScore');
+const playerOScore = document.getElementById('playerOScore');
 
-const cellElements = document.querySelectorAll('[data-cell]');
-const board = document.getElementById('board');
-const winningMessageElement = document.getElementById('winningMessage');
-const restartButton = document.getElementById('restartButton');
-const winningMessageText = document.querySelector('[data-winning-message-text]');
+let currentPlayer = 'X';
+let gameBoard = ['', '', '', '', '', '', '', '', ''];
+let xScore = 0;
+let oScore = 0;
+let isGameActive = true;
 
-const WINNING_COMBINATIONS = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6]
+const winPatterns = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+    [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+    [0, 4, 8], [2, 4, 6] // Diagonals
 ];
 
-let oTurn;
+function checkWinner() {
+    for (const pattern of winPatterns) {
+        const [a, b, c] = pattern;
+        if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+            highlightWinningCells(pattern);
+            updateScore();
+            return true;
+        }
+    }
 
-startGame();
-
-restartButton.addEventListener('click', startGame);
-
-function startGame() {
-    oTurn = false;
-    cellElements.forEach(cell => {
-        cell.classList.remove('X', 'O');
-        cell.textContent = "";
-        cell.removeEventListener('click', handleClick);
-        cell.addEventListener('click', handleClick, { once: true });
-    });
-    winningMessageElement.classList.remove('show');
+    if (!gameBoard.includes('')) {
+        alert('It\'s a draw!');
+        isGameActive = false;
+        return true;
+    }
+    return false;
 }
 
-function handleClick(e) {
-    const cell = e.target;
-    const currentClass = oTurn ? 'O' : 'X';
-    placeMark(cell, currentClass);
+function highlightWinningCells(pattern) {
+    pattern.forEach(index => {
+        cells[index].classList.add('winning-cell');
+    });
+}
 
-    if (checkWin(currentClass)) {
-        endGame(false);
-    } else if (isDraw()) {
-        endGame(true);
+function updateScore() {
+    if (currentPlayer === 'X') {
+        xScore++;
+        playerXScore.textContent = xScore;
     } else {
-        swapTurns();
+        oScore++;
+        playerOScore.textContent = oScore;
     }
 }
 
-function placeMark(cell, currentClass) {
-    cell.classList.add(currentClass);
-    cell.textContent = currentClass;
-}
+function handleClick(event) {
+    const cell = event.target;
+    const index = cell.getAttribute('data-index');
 
-function swapTurns() {
-    oTurn = !oTurn;
-}
+    if (gameBoard[index] || !isGameActive) return;
 
-function checkWin(currentClass) {
-    return WINNING_COMBINATIONS.some(combination => {
-        return combination.every(index => {
-            return cellElements[index].classList.contains(currentClass);
-        });
-    });
-}
+    gameBoard[index] = currentPlayer;
+    cell.textContent = currentPlayer;
 
-function isDraw() {
-    return [...cellElements].every(cell => {
-        return cell.classList.contains('X') || cell.classList.contains('O');
-    });
-}
-
-function endGame(draw) {
-    if (draw) {
-        winningMessageText.textContent = "Draw!";
+    if (checkWinner()) {
+        isGameActive = false;
     } else {
-        winningMessageText.textContent = `${oTurn ? "O's" : "X's"} Wins!`;
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
     }
-    winningMessageElement.classList.add('show');
 }
+
+function restartGame() {
+    gameBoard = ['', '', '', '', '', '', '', '', ''];
+    isGameActive = true;
+    currentPlayer = 'X';
+
+    cells.forEach(cell => {
+        cell.textContent = '';
+        cell.classList.remove('winning-cell');
+    });
+}
+
+cells.forEach(cell => cell.addEventListener('click', handleClick));
+restartBtn.addEventListener('click', restartGame);
