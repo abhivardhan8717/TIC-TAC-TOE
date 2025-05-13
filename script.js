@@ -21,13 +21,14 @@ function checkWinner() {
         if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
             highlightWinningCells(pattern);
             updateScore();
+            isGameActive = false;  // Lock the game once a winner is found
             return true;
         }
     }
 
     if (!gameBoard.includes('')) {
         alert('It\'s a draw!');
-        isGameActive = false;
+        isGameActive = false;  // Lock the game in case of a draw
         return true;
     }
     return false;
@@ -53,26 +54,26 @@ function handleClick(event) {
     const cell = event.target;
     const index = cell.getAttribute('data-index');
 
-    if (gameBoard[index] || !isGameActive) return;
+    if (gameBoard[index] || !isGameActive) return;  // Ignore clicks if game is over
 
     gameBoard[index] = currentPlayer;
     cell.textContent = currentPlayer;
 
     if (checkWinner()) {
-        isGameActive = false;
+        return;  // Stop further moves if the game has a winner or draw
     } else {
-        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';  // Change player
     }
 }
 
 function restartGame() {
-    gameBoard = ['', '', '', '', '', '', '', '', ''];
-    isGameActive = true;
-    currentPlayer = 'X';
+    gameBoard = ['', '', '', '', '', '', '', '', ''];  // Reset the game board
+    isGameActive = true;  // Enable game for new round
+    currentPlayer = 'X';  // Start with Player X
 
     cells.forEach(cell => {
-        cell.textContent = '';
-        cell.classList.remove('winning-cell');
+        cell.textContent = '';  // Clear all cell texts
+        cell.classList.remove('winning-cell');  // Remove any winning styles
     });
 }
 
